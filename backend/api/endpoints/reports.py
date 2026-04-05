@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db.session import get_session
-from models.report import Report, ReportCreate, ReportUpdate
+from models.report import Report, ReportCreate, ReportUpdate, get_now_jst
 
 router = APIRouter()
 
@@ -21,6 +21,11 @@ def create_report(
     3. DBへ保存し、最新の状態（ID等）をリフレッシュして返す
     """
     db_report = Report.model_validate(report_in)
+    # 日本時間をセット
+    now = get_now_jst()
+    db_report.created_at = now
+    db_report.updated_at = now
+    
     session.add(db_report)
     session.commit()
     session.refresh(db_report)
@@ -95,6 +100,9 @@ def update_report(
     for key, value in update_data.items():
         # 既存のモデルオブジェクト(db_report)の各属性を動的に上書き
         setattr(db_report, key, value)
+    
+    # 更新時刻を日本時間で上書き
+    db_report.updated_at = get_now_jst()
 
     # 保存して最新状態を返す
     session.add(db_report)

@@ -45,8 +45,14 @@ function ReportCard({
       
       {/* メタ情報エリア: 日付と投稿者 */}
       <div className="mt-5 pt-4 border-t border-gray-50 flex items-center gap-6 text-sm text-gray-500">
+        {/* 投稿者名 */}
         <span className="flex items-center gap-1 font-medium text-gray-700">👤 {report.author}</span>
-        <span className="flex items-center gap-1">📅 {new Date(report.created_at).toLocaleString("ja-JP")}</span>
+        {/* 作成日時と更新日時が異なる場合（＝更新済み）は「更新」と表示 */}
+        <span className="flex items-center gap-1">
+          📅 {report.updated_at && report.updated_at !== report.created_at ? "更新: " : "作成: "}
+          {/* 日付表示: バックエンドからJST（日本時間）の「生データ」を表示 */}
+          {new Date(report.updated_at || report.created_at).toLocaleString("ja-JP")}
+        </span>
       </div>
     </article>
   );
@@ -123,7 +129,6 @@ export default function Home() {
 
   /**
    * [API POST/PATCH] フォーム送信処理
-   * React 19の型定義変更(ts6385)対策として React.BaseSyntheticEvent を使用
    */
   const handleSubmit = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
