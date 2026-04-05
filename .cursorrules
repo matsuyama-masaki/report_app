@@ -1,0 +1,9 @@
+バックエンドは FastAPI と SQLModel を使用する。
+
+フォルダ構成は app/api, app/models, app/crud に従うこと。
+
+DB操作は必ず app/crud に記述し、Routerから直接 session をいじらない。
+
+非同期 (async def) を標準とする。
+
+定数は constants.py を参照する。

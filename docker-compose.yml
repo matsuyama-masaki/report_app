@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16
+    container_name: fastapi_db
+    restart: always
+    environment:
+      POSTGRES_USER: report_admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: report_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: fastapi_server
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://report_admin:password@db:5432/report_db
+
+  frontend:
+    build: ./frontend
+    container_name: nextjs_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
