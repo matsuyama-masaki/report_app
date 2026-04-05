@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  /* モダンな清潔感のある白と黒の定義 */
+  --background: #f7fafc; /* ほんの少しグレーがかった白（目に優しい） */
+  --foreground: #1a202c; /* 深みのあるネイビーグレー */
+}
+
+/* ダークモード用の設定（@media...）を削除、または上書き */
+:root {
+  --background: #f7fafc;
+  --foreground: #1a202c;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
