@@ -30,3 +30,8 @@ class Report(ReportBase, table=True):
         default_factory=lambda: datetime.now(timezone.utc),
         description="更新日時（UTC）"
         )
+
+class ReportUpdate(SQLModel):
+    title: str | None = None
+    content: str | None = None
+    author: str | None = None

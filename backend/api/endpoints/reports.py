@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from db.session import get_session
 from models.report import Report, ReportCreate
@@ -42,3 +42,25 @@ def read_reports(
     stm = select(Report).order_by(Report.created_at.desc())
     reports: list[Report] = session.exec(stm).all()
     return reports
+
+@router.delete(
+    "/{report_id}",
+    response_model=Report,
+    summary="レポートの削除",
+    response_description="削除成功メッセージ"
+)
+def delete_report(
+    report_id: int,
+    db: Session = Depends(get_session)
+)-> Report:
+    """
+    指定された ID のレポートを物理削除します。
+    """
+    db_report = db.get(Report, report_id)
+    if not db_report:
+        # もし存在しない ID だったら 404 エラーを返す
+        raise HTTPException(status_code=404, detail="レポートがありません。")
+    
+    db.delete(db_report)
+    db.commit()
+    return db_report

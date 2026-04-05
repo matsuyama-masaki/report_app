@@ -8,9 +8,19 @@ import { Report } from "../types/report";
  * 各レポートをカード形式で表示するUIコンポーネントです。
  * データの「表示」に関するロジックをここにカプセル化しています。
  */
-function ReportCard({ report }: { report: Report }) {
+function ReportCard({ report, onDelete }: { report: Report, onDelete: (id: number) => void }) {
   return (
-    <article className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+    // group クラスを追加して、ホバー時にボタンが出るようにする
+    <article className="group relative bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+      {/* 🗑 削除ボタン */}
+      <button 
+        onClick={() => onDelete(report.id)}
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 p-2 rounded-lg transition-all"
+        title="削除する"
+      >
+        ✕
+      </button>
+
       <h2 className="text-xl font-bold text-blue-600 mb-3">{report.title}</h2>
       <p className="text-gray-700 leading-relaxed break-words whitespace-pre-wrap">{report.content}</p>
       
@@ -48,6 +58,25 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Failed to fetch reports:", error);
+    }
+  };
+
+  /**
+   * [API DELETE] 削除実行関数
+   */
+  const handleDelete = async (id: number) => {
+    if (!confirm("このレポートを削除してもよろしいですか？")) return;
+    
+    try {
+      const res = await fetch(`http://localhost:8000/reports/${id}`, {
+        method: "DELETE", // 通信メソッドを DELETE に指定
+      });
+      
+      if (res.ok) {
+        fetchReports(); // 削除に成功したら一覧を更新
+      }
+    } catch (error) {
+      console.error("Failed to delete report:", error);
     }
   };
 
@@ -89,7 +118,7 @@ export default function Home() {
         <p className="text-gray-500 mt-2">業務進捗の共有と確認がリアルタイムに行えます</p>
       </header>
 
-      {/* 投稿フォーム: 直感的に入力できるよう背景色を分けています */}
+      {/* 投稿フォーム */}
       <section className="mb-12 bg-gray-50 p-6 rounded-2xl border border-gray-200">
         <h2 className="text-lg font-bold mb-4 text-gray-800">✍️ 新規レポート投稿</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -123,7 +152,7 @@ export default function Home() {
         <div className="grid gap-6">
           {reports.length > 0 ? (
             reports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard key={report.id} report={report} onDelete={handleDelete}/>
             ))
           ) : (
             <p className="text-center text-gray-400 py-10">レポートはまだありません。</p>
